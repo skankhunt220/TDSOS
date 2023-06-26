@@ -13,7 +13,6 @@ public class NoobChain {
 
     public static void main(String[] args) {
 
-        // Create a new blockchain with difficulty level 2
         MedicalBlockchain blockchain = new MedicalBlockchain(5);
 
         // Create some sample medical records
@@ -39,10 +38,9 @@ public class NoobChain {
 
         // Access the medical records from the latest block
         List<MedicalRecord> medicalRecords = latestBlock.getMedicalRecords();
-        for (MedicalRecord record : medicalRecords) {
-            log.info("Medical Record: " + record.getRecordId() + " - " + record.getPatientName());
-        }
+        medicalRecords.forEach(mr -> log.info("Medical Record: " + mr.getRecordId() + " - " + mr.getPatientName()));
 
+        // Access all blockchain
         blockchain.getBlockchain().forEach(b -> log.info(b.toString()));
 
     }

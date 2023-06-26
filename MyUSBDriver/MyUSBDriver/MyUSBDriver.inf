@@ -1,0 +1,88 @@
+;
+; MyUSBDriver.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=USBDevice
+ClassGuid={88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider=%ManufacturerName%
+CatalogFile=MyUSBDriver.cat
+DriverVer=
+PnpLockDown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+MyUSBDriver_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+MyUSBDriver.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%MyUSBDriver.DeviceDesc%=MyUSBDriver_Device, USB\MyUSBDriver
+
+[MyUSBDriver_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+MyUSBDriver.sys
+
+[MyUSBDriver_Device.NT.HW]
+AddReg=MyUSBDriver_AddReg
+
+[MyUSBDriver_AddReg]
+; By default, USBDevice class uses iProduct descriptor to name the device in
+; Device Manager on Windows 8 and higher.
+; Uncomment for this device to use %DeviceName% on Windows 8 and higher:
+;HKR,,FriendlyName,,%MyUSBDriver.DeviceDesc%
+
+;-------------- Service installation
+[MyUSBDriver_Device.NT.Services]
+AddService = MyUSBDriver,%SPSVCINST_ASSOCSERVICE%, MyUSBDriver_Service_Inst
+
+; -------------- MyUSBDriver driver install sections
+[MyUSBDriver_Service_Inst]
+DisplayName    = %MyUSBDriver.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\MyUSBDriver.sys
+
+;
+;--- MyUSBDriver_Device Coinstaller installation ------
+;
+
+[MyUSBDriver_Device.NT.CoInstallers]
+AddReg=MyUSBDriver_Device_CoInstaller_AddReg
+CopyFiles=MyUSBDriver_Device_CoInstaller_CopyFiles
+
+[MyUSBDriver_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[MyUSBDriver_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[MyUSBDriver_Device.NT.Wdf]
+KmdfService =  MyUSBDriver, MyUSBDriver_wdfsect
+[MyUSBDriver_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Universal Serial Bus devices"
+DiskName = "MyUSBDriver Installation Disk"
+MyUSBDriver.DeviceDesc = "MyUSBDriver Device"
+MyUSBDriver.SVCDESC = "MyUSBDriver Service"
+REG_MULTI_SZ = 0x00010000
